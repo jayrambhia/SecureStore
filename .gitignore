@@ -37,7 +37,7 @@ local.properties
 .idea/scopes/scope_settings.xml
 
 
-*.iml
+
 *.iws
 *.ipr
 *~
