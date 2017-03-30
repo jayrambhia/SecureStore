@@ -25,8 +25,8 @@ public interface EncryptionStore {
     String ENCRYPTION_ALGORITHM = Build.VERSION.SDK_INT < 23 ? "RSA" : KeyProperties.KEY_ALGORITHM_RSA;
 
     void initialize(@NonNull String alias) throws KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException, UnrecoverableEntryException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException;
-    byte[] encrypt(@NonNull String data) throws IOException;
-    String decrypt(byte[] data) throws IOException;
+    String encrypt(@NonNull String data) throws IOException;
+    String decrypt(@NonNull String data) throws IOException;
 
     String getAlgorithm();
 

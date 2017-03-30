@@ -2,6 +2,7 @@ package com.fenchtose.securestore;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -70,7 +71,7 @@ public abstract class BaseEncryptionStore implements EncryptionStore {
         onGeneratorInitialized(alias);
     }
 
-    protected void onGeneratorInitialized(@NonNull String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException, InvalidKeyException, NoSuchPaddingException {
+    protected void onGeneratorInitialized(@NonNull String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException, InvalidKeyException, NoSuchPaddingException, NoSuchProviderException {
         generateKeys(alias);
         initCiphers();
     }
@@ -81,15 +82,15 @@ public abstract class BaseEncryptionStore implements EncryptionStore {
         publicKey = privateKeyEntry.getCertificate().getPublicKey();
     }
 
-    protected void initCiphers() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        encryptionCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+    protected void initCiphers() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException {
+		encryptionCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         encryptionCipher.init(Cipher.ENCRYPT_MODE, publicKey);
         decryptionCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         decryptionCipher.init(Cipher.DECRYPT_MODE, privateKey);
     }
 
     @Override
-    public byte[] encrypt(@NonNull String data) throws IOException {
+    public String encrypt(@NonNull String data) throws IOException {
         if (encryptionCipher == null) {
             throw new NullPointerException("Encryption cipher is null");
         }
@@ -101,16 +102,16 @@ public abstract class BaseEncryptionStore implements EncryptionStore {
         os.flush();
         os.close();
 
-        return os.toByteArray();
+        return Base64.encodeToString(os.toByteArray(), Base64.DEFAULT);
     }
 
     @Override
-    public String decrypt(byte[] data) throws IOException {
+    public String decrypt(@NonNull String data) throws IOException {
         if (decryptionCipher == null) {
             throw new NullPointerException("Decryption Cipher is null");
         }
 
-        ByteArrayInputStream is = new ByteArrayInputStream(data);
+        ByteArrayInputStream is = new ByteArrayInputStream(Base64.decode(data, Base64.DEFAULT));
         CipherInputStream cis = new CipherInputStream(is, decryptionCipher);
 
         int index = 0;
